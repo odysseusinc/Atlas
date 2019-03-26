@@ -1,7 +1,9 @@
 define([
     'numeral',
+    '../../utils',
 ], function (
-	numeral
+	numeral,
+  utils,
 ) {
 
     class BaseStatConverter {
@@ -50,7 +52,7 @@ define([
             analysis.reports.forEach((r, i) => r.stats.forEach(mapCovariate(r)));
 
             cohorts.forEach((c, i) => {
-              for (let strataId of strataNames.keys()) {
+              for (let strataId of utils.sortedStrataNames(strataNames).map(s => s.id)) {
                 columns = columns.concat(this.getReportColumns(strataId, c.cohortId));
               }
             });
@@ -71,7 +73,8 @@ define([
                 stratified,
                 cohorts,
                 strataNames: strataNames,
-                perStrataValues: this.getReportColumns(0,0).map(col => col.title),
+                defaultColNames: this.getDefaultColumns().map(col => col.title),
+                perStrataColNames: this.getReportColumns(0,0).map(col => col.title),
                 columns: columns,
                 data: Array.from(data.values()),
             };
