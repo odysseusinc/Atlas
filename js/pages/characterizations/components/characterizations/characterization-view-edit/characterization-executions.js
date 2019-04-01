@@ -61,6 +61,8 @@ define([
 			this.exitMessage = ko.observable();
 			this.pollId = null;
 
+			this.design = params.design;
+
 			this.execColumns = [{
 					title: 'Date',
 					className: this.classes('col-exec-date'),
@@ -134,7 +136,8 @@ define([
 		}
 
 		isExecutionPermitted(sourceKey) {
-			return PermissionService.isPermittedGenerateCC(this.characterizationId(), sourceKey) && !this.designDirtyFlag().isDirty();
+			return PermissionService.isPermittedGenerateCC(this.characterizationId(), sourceKey) && !this.designDirtyFlag().isDirty() &&
+				this.design().cohorts().length;
 		}
 
 		isResultsViewPermitted(sourceKey) {
@@ -192,10 +195,19 @@ define([
 			}
 		}
 
-		generate(source, lastestDesign) {
-			if(lastestDesign === this.currentHash()) {
-				if (!confirm('No changes have been made since last execution. Do you still want to run new one?')) {
-					return false;
+		generate(source, latestDesign) {
+			if(latestDesign === this.currentHash()) {
+				const sg = this.executionGroups().find(g => g.sourceKey === source);
+				if (sg) {
+					const submissions = [...sg.submissions()];
+					if (submissions.length > 0) {
+						submissions.sort((a, b) => b.endTime - a.endTime); // sort descending
+						if (submissions[0].status !== this.ccGenerationStatusOptions.FAILED) {
+							if (!confirm('No changes have been made since last execution. Do you still want to run new one?')) {
+								return false;
+							}
+						}
+					}
 				}
 			}
 
