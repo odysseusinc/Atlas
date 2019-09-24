@@ -100,7 +100,6 @@ define([
 				this.loadingPerson = ko.observable(false);
 				this.cantFindPerson = ko.observable(false);
 				this.shadedRegions = ko.observable([]);
-				console.log(moment);
 				this.setSourceKey = (d) => {
 					this.sourceKey(d.sourceKey);
 				};
